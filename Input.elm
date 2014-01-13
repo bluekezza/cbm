@@ -1,3 +1,4 @@
+--https://github.com/maxsnew/Scramble/blob/master/Input.elm
 module Input (buttons)
        where
 import Graphics.Input as I
