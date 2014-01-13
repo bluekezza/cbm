@@ -1,3 +1,6 @@
+import Input as I
+import Error
+
 -- Prelude
 divMod : Int -> Int -> (Int, Int)
 divMod n d = (div n d, mod n d)
@@ -17,27 +20,56 @@ chunk k xs =
   in
     go xs
 
+lookup : a -> [(a,b)] -> Maybe b
+lookup key xys =
+  if | xys == [] -> Nothing
+     | otherwise -> let
+                      (x,y) = head xys
+                    in
+                      if (key == x) then (Just y) else (lookup key (tail xys))
+
 -- Model
+state = change 0 allSad
+
 allSad : [(Int, Bool)]
 allSad = map (\i -> (i, False)) [0..15]
 
 -- Update
-change n moods = 
+change n moods =
   let
     switcher (i, m) = if (i == n) then (i, not m) else (i, m)
   in
     map (switcher) moods
 
+select n model =
+  let
+    nextSeed = (n + 1) `mod` 16
+    match = lookup n model
+  in
+    case match of
+      (Just True) -> change nextSeed (change n model)
+      (Just False) -> model
+      Nothing -> model
+
+step : Maybe Int -> [(Int, Bool)] -> [(Int, Bool)]
+step m model = 
+  case (m) of Nothing -> Error.raise "No n supplied"
+              (Just n) -> select n model
+
 -- Display
+size : Int
 size = 150
+
+img : String -> Element
 img = fittedImage size size
 
 face : (Int, Bool) -> Element
 face (i, happy) = 
   let
     name = if happy then "happy" else "sad"
+    e = img ("/img/" ++ (show i) ++ "_" ++ name ++ ".png")
   in
-    img ("/img/" ++ (show i) ++ "_" ++ name ++ ".png")
+    faceButton.button (Just i) e
 
 faces : [(Int, Bool)] -> [Element]
 faces moods = map (face) moods
@@ -46,10 +78,27 @@ grid : Int -> [Element] -> Element
 grid n elems =
   let
     ess = chunk n elems
-    acrosses = map (\es -> flow right es) ess
+    acrosses = map (\es -> flow right es) ess   --flow allows you to go from [Element] -> Element
     downs = flow down acrosses
   in
     downs
 
-main = grid 4 (faces (change 3 allSad))
+render : [(Int, Bool)] -> Element
+render state = 
+  let 
+    g = grid 4 (faces state)
+  in
+    if (not debug) then g else flow down [ g, asText state ]
 
+faceButton : { events : Signal (Maybe Int)
+             , button : Maybe Int -> Element -> Element }
+faceButton = I.buttons Nothing
+
+input : Signal (Maybe Int)
+input = faceButton.events
+
+main : Signal Element
+main = lift render (foldp step state input)
+
+debug : Bool
+debug = False
