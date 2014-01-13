@@ -1,0 +1,59 @@
+#!/bin/bash
+usage () { 
+  echo "
+Please provide a command
+  HOST
+  - up
+  - connect
+  - provision
+  - destroy
+  - browse
+  GUEST
+  - start
+"
+}
+
+#check the first command
+if [ $# -eq 0 ] ; then
+  usage; exit 1;
+fi
+
+command=$1
+shift
+
+case $command in
+    up)
+      vagrant up --no-provision
+      exit 0;;
+    connect)
+      vagrant ssh
+      exit 0;;
+    provision)
+      vagrant up
+      exit 0;;
+    destroy)
+      vagrant destroy
+      exit 0;;
+    browse)
+      xdg-open "http://localhost:3000/Main.elm"
+      exit 0;;
+    build)
+      rm -rf ./build
+      mkdir ./build
+      cp -vr ./img ./build/img
+      cp ~/.cabal/share/Elm-0.10.1/elm-runtime.js ./build/elm-runtime.js
+      elm --make -r "/elm-runtime.js" ./index.elm
+      exit 0;;
+    start)
+      cd ./build
+      echo "starting in $(pwd)"
+      elm-server --port=3000
+      cd ../
+      exit 0;;
+    help)
+      usage; exit;;
+    *)
+      echo 'Unknown command';
+      usage;
+      exit;;
+esac
