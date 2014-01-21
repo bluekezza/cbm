@@ -7,8 +7,10 @@ Please provide a command
   - connect
   - provision
   - destroy
+  - halt
   - browse
   GUEST
+  - build
   - start
 "
 }
@@ -34,15 +36,18 @@ case $command in
     destroy)
       vagrant destroy
       exit 0;;
+    halt)
+      vagrant halt
+      exit 0;;
     browse)
-      xdg-open "http://localhost:3000/Main.elm"
+      xdg-open "http://localhost:3000/index.html"
       exit 0;;
     build)
       rm -rf ./build
       mkdir ./build
       cp -vr ./img ./build/img
       cp ~/.cabal/share/Elm-0.10.1/elm-runtime.js ./build/elm-runtime.js
-      elm --make -r "/elm-runtime.js" ./index.elm
+      elm --make -r "/elm-runtime.js" index.elm
       exit 0;;
     start)
       cd ./build

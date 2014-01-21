@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
 
   config.vm.network :forwarded_port, guest: 3000, host: 3000
-  config.vm.network :private_network, ip: "192.168.2.3"
+  config.vm.network :private_network, ip: "192.168.2.4"
   config.vm.synced_folder "./", "/home/vagrant/workspace"
 
   config.vm.provision :chef_solo do |chef|
@@ -24,10 +24,10 @@ Vagrant.configure("2") do |config|
     echo "export PATH=~/.cabal/bin:$PATH" >> /home/vagrant/.profile
 su - vagrant -c "
 cd /home/vagrant/workspace;
-export PATH=/home/vagrant/.cabal/bin:$PATH
-#cabal sandbox init;
-#export PATH=./.cabal-sandbox/bin:$PATH;
+echo 'export PATH=~/.cabal/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
 cabal update
+#temporary and brute force fix for debian explained here: https://groups.google.com/forum/#!msg/pandoc-discuss/Livq5W1reqI/YfDgDKwjJVcJ
 cabal install pandoc --reinstall --force-reinstalls --constraint=transformers==0.3.0.0 --max-backjumps=10000;
 cabal install elm;
 cabal install elm-server;
