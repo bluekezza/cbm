@@ -15,7 +15,8 @@ Requires installation of (with tested versions):
 * [Virtualbox Extension Pack](https://www.virtualbox.org/wiki/Downloads) (4.3.6)
 * [Vagrant](http://www.vagrantup.com/downloads.html) (1.4.3)
 * Vagrant Virtualbox Guest Extension Plugin:
-```shell
+
+```bash
 vagrant plugin install vagrant-vbguest
 ```
 
