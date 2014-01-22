@@ -3,7 +3,6 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  #https://github.com/mitchellh/vagrant/wiki/Available-Vagrant-Boxes
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
   end
@@ -16,17 +15,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision :shell, :inline => <<EOF
     locale-gen en_GB.UTF-8
-    sed -i.bak 's/archive\.ubuntu\.com/gb.archive.ubuntu.com/' /etc/apt/sources.list
-    sed -i.bak 's/security\.ubuntu\.com/gb.archive.ubuntu.com/' /etc/apt/sources.list
-    apt-get clean && apt-get update
-    apt-get install -y squid-deb-proxy-client
+    apt-get update
 EOF
   config.vm.provision :shell, :inline => <<EOF
     apt-get install -y haskell-platform
 EOF
   config.vm.provision :shell, :inline => <<EOF
 su - vagrant -c '
-echo export PATH=\~/cbm/.cabal-sandbox/bin:\~/.cabal/bin:\$PATH >> ~/.bashrc
+echo export PATH=\~/.cabal/bin:\$PATH >> ~/.bashrc
 source ~/.bashrc
 cabal update
 cabal install cabal-1.18.1.2 cabal-install-1.18.0.2
@@ -36,7 +32,6 @@ EOF
 su - vagrant -c '
   cd ~/cbm;
   cabal install elm-0.11 elm-server-0.10.1 --constraint "transformers==0.3.0.0"
-
 '
 EOF
 end
