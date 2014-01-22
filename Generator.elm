@@ -1,4 +1,4 @@
--- href=https://github.com/jcollard/generator
+{- Package take from https://github.com/jcollard/generator -}
 module Generator(Generator,
                  int32,
                  int32Range,

@@ -1,28 +1,13 @@
 import Input as I
 import open Generator
 import open Generator.Standard
-import Native.Error
 import open Shuffle
 import open Data.List
+import open Core
+import open Time
 
 debug : Bool
 debug = False
-
--- provides a tuple of div and mod
-divMod : Int -> Int -> (Int, Int)
-divMod n d = (div n d, mod n d)
-
--- raise an error message
-error msg = Native.Error.raise msg
-
--- lookup a key from a key-value list
-lookup : a -> [(a,b)] -> Maybe b
-lookup key kvs =
-  if | kvs == [] -> Nothing
-     | otherwise -> let
-                      (k,v) = head kvs
-                    in
-                      if (key == k) then (Just v) else (lookup key (tail kvs))
 
 -- Model
 type Model = { state: [(Int, Bool)], generator: Generator Standard }
@@ -53,8 +38,8 @@ change n moods =
     map (switcher) moods
 
 -- selects the face at position n, if correct, the faces shuffle and a different happy face is set
-select : Int -> Model -> Model
-select n model =
+select : Time -> Int -> Model -> Model
+select t n model =
   case (lookup n model.state) of
     Nothing -> model
     (Just False) -> model
@@ -66,12 +51,14 @@ select n model =
                      { state=state'', generator=generator'' }
 
 -- represents a step in changing the model due to a signal
-step : Maybe Int -> Model -> Model
-step m model = case (m) of
-                 Nothing -> error "No n supplied"
-                 (Just n) -> select n model
+step : (Time, Maybe Int) -> Model -> Model
+step (t,m) model = case (m) of
+                     Nothing -> error "No n supplied"
+                     (Just n) -> select t n model
 
 -- Display
+
+-- the dimensions of the faces
 size : Int
 size = 150
 
@@ -85,7 +72,7 @@ imgUrl i happy =
   let
     name = if happy then "happy" else "sad"
   in
-    ("/img/" ++ (show i) ++ "_" ++ name ++ ".png")
+    ("img/" ++ (show i) ++ "_" ++ name ++ ".png")
 
 -- creates a face button
 face : (Int, Bool) -> Element
@@ -110,6 +97,7 @@ grid n elems =
     downs
 
 -- renders the model into elements for display
+-- includes an imageCache so that the browser downloads all images, to ensure there is not a delay when a new happy face appears
 render : Model -> Element
 render model = 
   let 
@@ -127,8 +115,8 @@ faceButton : { events : Signal (Maybe Int)
 faceButton = I.buttons Nothing
 
 -- represents the input to the system
-input : Signal (Maybe Int)
-input = faceButton.events
+input : Signal (Time, Maybe Int)
+input = timestamp faceButton.events
 
 -- the main application entry point
 main : Signal Element

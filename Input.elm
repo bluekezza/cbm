@@ -1,17 +1,17 @@
---https://github.com/maxsnew/Scramble/blob/master/Input.elm
+{- Code derived from https://github.com/maxsnew/Scramble/blob/master/Input.elm -}
 module Input (buttons)
        where
 import Graphics.Input as I
 import Mouse
 import Maybe as M
+import open Core
 
 const : a -> b -> a
 const x y = x
 
--- Infinite loop bc I don't know how to do errors
 fromJust x = case x of
   Just y -> y
-  Nothing -> fromJust x
+  Nothing -> error "Nothing received in fromJust"
 
 justs : a -> Signal (Maybe a) -> Signal a
 justs x s = fromJust <~ (keepIf M.isJust (Just x) s)
@@ -24,16 +24,3 @@ buttons def = let hovs = I.hoverables (Just def)
                                                         then Just v
                                                         else Nothing)
                  }
-
--- Test
-scs = buttons Nothing
-
-ele n = scs.button (Just n) (asText n)
-celm = constant . ele
-
-main = flow down <~ (combine <|
-       [ celm 1
-       , celm 2
-       , celm 3
-       , asText <~ scs.events
-       ])

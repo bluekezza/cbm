@@ -1,37 +1,42 @@
+# -*- coding: utf-8 -*-
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "precise32"
-  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+  #https://github.com/mitchellh/vagrant/wiki/Available-Vagrant-Boxes
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+  end
+  config.vm.box = "saucy32"
+  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/saucy/20140122/saucy-server-cloudimg-i386-vagrant-disk1.box"
 
   config.vm.network :forwarded_port, guest: 3000, host: 3000
   config.vm.network :private_network, ip: "192.168.2.4"
-  config.vm.synced_folder "./", "/home/vagrant/workspace"
-
-  config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = "cookbooks"
-    chef.add_recipe "apt"
+  config.vm.synced_folder "./", "/home/vagrant/cbm"
 
   config.vm.provision :shell, :inline => <<EOF
+    locale-gen en_GB.UTF-8
+    sed -i.bak 's/archive\.ubuntu\.com/gb.archive.ubuntu.com/' /etc/apt/sources.list
+    sed -i.bak 's/security\.ubuntu\.com/gb.archive.ubuntu.com/' /etc/apt/sources.list
+    apt-get clean && apt-get update
     apt-get install -y squid-deb-proxy-client
-    sed -i.bak 's/us\.archive\.ubuntu\.com/gb.archive.ubuntu.com/' /etc/apt/sources.list
-    apt-get update
+EOF
+  config.vm.provision :shell, :inline => <<EOF
     apt-get install -y haskell-platform
-    cabal update
-    cabal install Cabal
-    cabal install cabal-install
-    echo "export PATH=~/.cabal/bin:$PATH" >> /home/vagrant/.profile
-su - vagrant -c "
-cd /home/vagrant/workspace;
-echo 'export PATH=~/.cabal/bin:$PATH' >> ~/.bashrc
+EOF
+  config.vm.provision :shell, :inline => <<EOF
+su - vagrant -c '
+echo export PATH=\~/cbm/.cabal-sandbox/bin:\~/.cabal/bin:\$PATH >> ~/.bashrc
 source ~/.bashrc
 cabal update
-#temporary and brute force fix for debian explained here: https://groups.google.com/forum/#!msg/pandoc-discuss/Livq5W1reqI/YfDgDKwjJVcJ
-cabal install pandoc --reinstall --force-reinstalls --constraint=transformers==0.3.0.0 --max-backjumps=10000;
-cabal install elm;
-cabal install elm-server;
-"
+cabal install cabal-1.18.1.2 cabal-install-1.18.0.2
+'
 EOF
-  end
+  config.vm.provision :shell, :inline => <<EOF
+su - vagrant -c '
+  cd ~/cbm;
+  cabal install elm-0.11 elm-server-0.10.1 --constraint "transformers==0.3.0.0"
+
+'
+EOF
 end
