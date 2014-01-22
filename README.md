@@ -11,8 +11,13 @@
 Vagrant is used to provision an linux virtual machine in which to install the dependencies and compile and start the server.
 
 Requires installation of (with tested versions):
-* Virtual Box (4.3.6)
-* Vagrant (1.4.3)
+* [Virtualbox](https://www.virtualbox.org/wiki/Downloads) (4.3.6)
+* [Virtualbox Extension Pack](https://www.virtualbox.org/wiki/Downloads) (4.3.6)
+* [Vagrant](http://www.vagrantup.com/downloads.html) (1.4.3)
+* Vagrant Virtualbox Guest Extension Plugin:
+```shell
+vagrant plugin install vagrant-vbguest
+```
 
 ### Provisioning
 
