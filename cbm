@@ -46,7 +46,7 @@ case $command in
       rm -rf ./build
       mkdir ./build
       cp -vr ./img ./build/img
-      cp ./.cabal-sandbox/share/i386-linux-ghc-7.4.1/Elm-0.11/elm-runtime.js ./build/elm-runtime.js || cp ~/.cabal/share/Elm-0.11/elm-runtime.js ./build/elm-runtime.js
+      cp ./.cabal-sandbox/share/i386-linux-ghc-7.4.1/Elm-0.11/elm-runtime.js ./build/elm-runtime.js 2> /dev/null || cp ~/.cabal/share/Elm-0.11/elm-runtime.js ./build/elm-runtime.js 2> /dev/null 
       elm --make -r "elm-runtime.js" index.elm
       exit 0;;
     start)

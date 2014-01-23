@@ -44,14 +44,16 @@ select t n model =
     Nothing -> model
     (Just False) -> model
     (Just True) -> let
-                     (state', generator') = shuffle allSad model.generator
+                     -- reseeding the generator using the time of the mouse.click (i.e unpredictable)
+                     -- TODO: I would prefer to just kick start the generator with a seed using the start-time (i.e page_load)
+                     (state', generator') = shuffle allSad <| generator (round t)
                      (val, generator'') = int32Range (0, 15) generator'
                      state'' = change val state'
                    in
                      { state=state'', generator=generator'' }
 
 -- represents a step in changing the model due to a signal
-step : (Time, Maybe Int) -> Model -> Model
+step : (Time, FaceSelection) -> Model -> Model
 step (t,m) model = case (m) of
                      Nothing -> error "No n supplied"
                      (Just n) -> select t n model
@@ -110,12 +112,13 @@ render model =
     else flow down (elements ++ [asText model.state])
 
 -- provides the event for all faceButtons to group their events and tie their id to the event
-faceButton : { events : Signal (Maybe Int)
+type FaceSelection = Maybe Int
+faceButton : { events : Signal FaceSelection
              , button : Maybe Int -> Element -> Element }
 faceButton = I.buttons Nothing
 
 -- represents the input to the system
-input : Signal (Time, Maybe Int)
+input : Signal (Time, FaceSelection)
 input = timestamp faceButton.events
 
 -- the main application entry point
