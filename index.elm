@@ -11,17 +11,17 @@ debug : Bool
 debug = False
 
 -- Model
-{- Discussion of timestamp at start here: https://github.com/evancz/Elm/pull/416
-referencing this example: https://github.com/jvoigtlaender/labyrinth-elm/blob/018bbb5071d51414436e23ef0d0870bfd6396dbc/labyrinth.elm#L138-#L143
--}
-timeStampAtStart : Signal Time
-timeStampAtStart = fst <~ (timestamp (constant ()))
-
-type Model = { init: Bool, state: [(Int, Bool)], generator: Generator Standard }
+type Model = { init: Bool
+             , state: [(Int, Bool)]
+             , generator: Generator Standard
+             }
 
 -- the initial state of the model
 initialState : Model
-initialState = { init=False, state=[], generator=generator 0}
+initialState = { init=False
+               , state=[]
+               , generator=generator 0
+               }
 
 -- all combinations of people and moods
 allMoods : [(Int, Bool)]
@@ -54,18 +54,23 @@ select n model =
                              , generator <- generator'' }
 
 -- represents a step in changing the model due to a signal
-step : (FaceSelection, Time) -> Model -> Model
-step (mSelection, tStart) model = 
+step : (FaceSelection, (Time, Int)) -> Model -> Model
+step (mSelection, (tStart, _)) model = 
   let
+    m = model
     -- initialize the model if empty
-    model' = case (model.init) of
+    model' = case (m.init) of
                True -> case (mSelection) of
-                         Nothing -> model -- SMELL: the regular time signal will route through this branch. Ideally it would indicate an error => error "No selection supplied"
-                         (Just selection) -> select selection model
+                         (Just selection) -> select selection m
+                         Nothing -> error "No selection supplied"
                False -> let
-                          m = { init=True, state=(change 0 allSad), generator=(generator (round tStart)) }
+                          n = 0
+                          m' = { m | init <- True
+                                   , state <- (change n allSad)
+                                   , generator <- (generator (round tStart)) 
+                               }
                         in
-                          select 0 m
+                          select n m'
   in
     model'
 
@@ -111,8 +116,8 @@ grid n elems =
 
 -- renders the model into elements for display
 -- includes an imageCache so that the browser downloads all images, to ensure there is not a delay when a new happy face appears
-render : Model -> Element
-render model = 
+display : Model -> Element
+display model = 
   let
     g = grid 4 (faces model.state)
     allImageCache = map (\(i,h) -> fittedImage 0 0 (imgUrl i h)) allMoods
@@ -120,7 +125,7 @@ render model =
   in
     if (not debug) 
     then flow down elements
-    else flow down (elements ++ [asText model.state])
+    else flow down (elements ++ [asText model])
 
 -- provides the event for all faceButtons to group their events and tie their id to the event
 type FaceSelection = Maybe Int
@@ -128,13 +133,18 @@ faceButton : { events : Signal FaceSelection
              , button : Maybe Int -> Element -> Element }
 faceButton = I.buttons Nothing
 
-signalAtStart : Signal Time
-signalAtStart = fps 1
-
 -- represents the input to the system
-input : Signal (FaceSelection, Time)
-input = lift2 (,) faceButton.events signalAtStart
+input : Signal (FaceSelection, (Time, Int))
+input = lift2 (,) faceButton.events (timestamp startSignal)
 
 -- the main application entry point
 main : Signal Element
-main = lift render (foldp step initialState input)
+main = lift display (foldp step initialState input)
+
+{- https://groups.google.com/d/msg/elm-discuss/X4wmckEtMyg/_OY5YL1Heys -}
+atStart = (\c -> c == 1 ) <~ (count <| fps 25)
+onStart = keepIf id False atStart
+sampleStart s = sampleOn onStart s
+
+startSignal : Signal Int
+startSignal = foldp (\v acc -> abs acc) (-1) (sampleStart (constant 0))
