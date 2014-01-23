@@ -54,16 +54,16 @@ select n model =
                              , generator <- generator'' }
 
 -- represents a step in changing the model due to a signal
-step : (FaceSelection, (Time, Time)) -> Model -> Model
-step (mSelection,(tS,tF)) model = 
+step : (FaceSelection, Time) -> Model -> Model
+step (mSelection, tStart) model = 
   let
     -- initialize the model if empty
     model' = case (model.init) of
                True -> case (mSelection) of
-                         Nothing -> model -- SMELL - the regular time signal will route through this branch. Ideally it would indicate an error => error "No selection supplied"
+                         Nothing -> model -- SMELL: the regular time signal will route through this branch. Ideally it would indicate an error => error "No selection supplied"
                          (Just selection) -> select selection model
                False -> let
-                          m = { init=True, state=(change 0 allSad), generator=(generator (round tS)) }
+                          m = { init=True, state=(change 0 allSad), generator=(generator (round tStart)) }
                         in
                           select 0 m
   in
@@ -113,7 +113,7 @@ grid n elems =
 -- includes an imageCache so that the browser downloads all images, to ensure there is not a delay when a new happy face appears
 render : Model -> Element
 render model = 
-  let 
+  let
     g = grid 4 (faces model.state)
     allImageCache = map (\(i,h) -> fittedImage 0 0 (imgUrl i h)) allMoods
     elements = allImageCache ++ [g]
@@ -128,11 +128,12 @@ faceButton : { events : Signal FaceSelection
              , button : Maybe Int -> Element -> Element }
 faceButton = I.buttons Nothing
 
+signalAtStart : Signal Time
 signalAtStart = fps 1
 
 -- represents the input to the system
-input : Signal (FaceSelection, (Time, Time))
-input = lift2 (,) faceButton.events (timestamp signalAtStart)
+input : Signal (FaceSelection, Time)
+input = lift2 (,) faceButton.events signalAtStart
 
 -- the main application entry point
 main : Signal Element
