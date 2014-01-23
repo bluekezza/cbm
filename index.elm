@@ -5,21 +5,23 @@ import open Shuffle
 import open Data.List
 import open Core
 import open Time
+import Window
 
 debug : Bool
 debug = False
 
 -- Model
-type Model = { state: [(Int, Bool)], generator: Generator Standard }
+type Model = { init: Bool
+             , state: [(Int, Bool)]
+             , generator: Generator Standard
+             }
 
 -- the initial state of the model
-model : Model
-model = 
-  let
-    seed = 0           -- TODO: The model always starts in the same state due to a static seed. The seed should be non-static.
-    (val, generator') = int32Range (0, 15) (generator seed)
-  in
-    { state=(change val allSad), generator=generator' }
+initialState : Model
+initialState = { init=False
+               , state=[]
+               , generator=generator 0
+               }
 
 -- all combinations of people and moods
 allMoods : [(Int, Bool)]
@@ -38,25 +40,39 @@ change n moods =
     map (switcher) moods
 
 -- selects the face at position n, if correct, the faces shuffle and a different happy face is set
-select : Time -> Int -> Model -> Model
-select t n model =
+select : Int -> Model -> Model
+select n model =
   case (lookup n model.state) of
     Nothing -> model
     (Just False) -> model
     (Just True) -> let
-                     -- reseeding the generator using the time of the mouse.click (i.e unpredictable)
-                     -- TODO: I would prefer to just kick start the generator with a seed using the start-time (i.e page_load)
-                     (state', generator') = shuffle allSad <| generator (round t)
+                     (state', generator') = shuffle allSad model.generator
                      (val, generator'') = int32Range (0, 15) generator'
                      state'' = change val state'
                    in
-                     { state=state'', generator=generator'' }
+                     { model | state <- state''
+                             , generator <- generator'' }
 
 -- represents a step in changing the model due to a signal
-step : (Time, FaceSelection) -> Model -> Model
-step (t,m) model = case (m) of
-                     Nothing -> error "No n supplied"
-                     (Just n) -> select t n model
+step : (FaceSelection, (Time, Int)) -> Model -> Model
+step (mSelection, (tStart, _)) model = 
+  let
+    m = model
+    -- initialize the model if empty
+    model' = case (m.init) of
+               True -> case (mSelection) of
+                         (Just selection) -> select selection m
+                         Nothing -> error "No selection supplied"
+               False -> let
+                          n = 0
+                          m' = { m | init <- True
+                                   , state <- (change n allSad)
+                                   , generator <- (generator (round tStart)) 
+                               }
+                        in
+                          select n m'
+  in
+    model'
 
 -- Display
 
@@ -100,16 +116,16 @@ grid n elems =
 
 -- renders the model into elements for display
 -- includes an imageCache so that the browser downloads all images, to ensure there is not a delay when a new happy face appears
-render : Model -> Element
-render model = 
-  let 
+display : Model -> Element
+display model = 
+  let
     g = grid 4 (faces model.state)
     allImageCache = map (\(i,h) -> fittedImage 0 0 (imgUrl i h)) allMoods
     elements = allImageCache ++ [g]
   in
     if (not debug) 
     then flow down elements
-    else flow down (elements ++ [asText model.state])
+    else flow down (elements ++ [asText model])
 
 -- provides the event for all faceButtons to group their events and tie their id to the event
 type FaceSelection = Maybe Int
@@ -118,9 +134,17 @@ faceButton : { events : Signal FaceSelection
 faceButton = I.buttons Nothing
 
 -- represents the input to the system
-input : Signal (Time, FaceSelection)
-input = timestamp faceButton.events
+input : Signal (FaceSelection, (Time, Int))
+input = lift2 (,) faceButton.events (timestamp startSignal)
 
 -- the main application entry point
 main : Signal Element
-main = lift render (foldp step model input)
+main = lift display (foldp step initialState input)
+
+{- https://groups.google.com/d/msg/elm-discuss/X4wmckEtMyg/_OY5YL1Heys -}
+atStart = (\c -> c == 1 ) <~ (count <| fps 25)
+onStart = keepIf id False atStart
+sampleStart s = sampleOn onStart s
+
+startSignal : Signal Int
+startSignal = foldp (\v acc -> abs acc) (-1) (sampleStart (constant 0))
