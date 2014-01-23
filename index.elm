@@ -5,21 +5,23 @@ import open Shuffle
 import open Data.List
 import open Core
 import open Time
+import Window
 
 debug : Bool
 debug = False
 
 -- Model
-type Model = { state: [(Int, Bool)], generator: Generator Standard }
+{- Discussion of timestamp at start here: https://github.com/evancz/Elm/pull/416
+referencing this example: https://github.com/jvoigtlaender/labyrinth-elm/blob/018bbb5071d51414436e23ef0d0870bfd6396dbc/labyrinth.elm#L138-#L143
+-}
+timeStampAtStart : Signal Time
+timeStampAtStart = fst <~ (timestamp (constant ()))
+
+type Model = { init: Bool, state: [(Int, Bool)], generator: Generator Standard }
 
 -- the initial state of the model
-model : Model
-model = 
-  let
-    seed = 0           -- TODO: The model always starts in the same state due to a static seed. The seed should be non-static.
-    (val, generator') = int32Range (0, 15) (generator seed)
-  in
-    { state=(change val allSad), generator=generator' }
+initialState : Model
+initialState = { init=False, state=[], generator=generator 0}
 
 -- all combinations of people and moods
 allMoods : [(Int, Bool)]
@@ -38,25 +40,34 @@ change n moods =
     map (switcher) moods
 
 -- selects the face at position n, if correct, the faces shuffle and a different happy face is set
-select : Time -> Int -> Model -> Model
-select t n model =
+select : Int -> Model -> Model
+select n model =
   case (lookup n model.state) of
     Nothing -> model
     (Just False) -> model
     (Just True) -> let
-                     -- reseeding the generator using the time of the mouse.click (i.e unpredictable)
-                     -- TODO: I would prefer to just kick start the generator with a seed using the start-time (i.e page_load)
-                     (state', generator') = shuffle allSad <| generator (round t)
+                     (state', generator') = shuffle allSad model.generator
                      (val, generator'') = int32Range (0, 15) generator'
                      state'' = change val state'
                    in
-                     { state=state'', generator=generator'' }
+                     { model | state <- state''
+                             , generator <- generator'' }
 
 -- represents a step in changing the model due to a signal
-step : (Time, FaceSelection) -> Model -> Model
-step (t,m) model = case (m) of
-                     Nothing -> error "No n supplied"
-                     (Just n) -> select t n model
+step : (FaceSelection, (Time, Time)) -> Model -> Model
+step (mSelection,(tS,tF)) model = 
+  let
+    -- initialize the model if empty
+    model' = case (model.init) of
+               True -> case (mSelection) of
+                         Nothing -> model -- SMELL - the regular time signal will route through this branch. Ideally it would indicate an error => error "No selection supplied"
+                         (Just selection) -> select selection model
+               False -> let
+                          m = { init=True, state=(change 0 allSad), generator=(generator (round tS)) }
+                        in
+                          select 0 m
+  in
+    model'
 
 -- Display
 
@@ -117,10 +128,12 @@ faceButton : { events : Signal FaceSelection
              , button : Maybe Int -> Element -> Element }
 faceButton = I.buttons Nothing
 
+signalAtStart = fps 1
+
 -- represents the input to the system
-input : Signal (Time, FaceSelection)
-input = timestamp faceButton.events
+input : Signal (FaceSelection, (Time, Time))
+input = lift2 (,) faceButton.events (timestamp signalAtStart)
 
 -- the main application entry point
 main : Signal Element
-main = lift render (foldp step model input)
+main = lift render (foldp step initialState input)
