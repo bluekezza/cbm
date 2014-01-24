@@ -1,11 +1,9 @@
 import Input as I
-import open Generator
-import open Generator.Standard
-import open Shuffle
-import open Data.List
-import open Core
-import open Time
-import Window
+import Generator (Generator, int32Range)
+import Generator.Standard (Standard, generator)
+import Shuffle (shuffle)
+import Data.List (chunk)
+import Core (error, divMod, lookup, startSignal)
 
 debug : Bool
 debug = False
@@ -140,11 +138,3 @@ input = lift2 (,) faceButton.events (timestamp startSignal)
 -- the main application entry point
 main : Signal Element
 main = lift display (foldp step initialState input)
-
-{- https://groups.google.com/d/msg/elm-discuss/X4wmckEtMyg/_OY5YL1Heys -}
-atStart = (\c -> c == 1 ) <~ (count <| fps 25)
-onStart = keepIf id False atStart
-sampleStart s = sampleOn onStart s
-
-startSignal : Signal Int
-startSignal = foldp (\v acc -> abs acc) (-1) (sampleStart (constant 0))
