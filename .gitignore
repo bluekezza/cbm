@@ -1,5 +1,4 @@
 cabal.sandbox.config
-build/
 cache/
 .cabal-sandbox/
 .vagrant

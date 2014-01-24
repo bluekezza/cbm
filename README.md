@@ -43,3 +43,7 @@ You can now browse to the web page using
 ```bash
 host:cbm$ ./cbm browse
 ```
+
+## Download
+
+A snapshot of the built project can be downloaded from the dist folder

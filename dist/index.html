@@ -1,0 +1,870 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>index</title><script type="text/javascript" src="elm-runtime.js"></script><script type="text/javascript">Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Main";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Core = Elm.Core.make(_elm);
+   var Data = Data || {};
+   Data.List = Elm.Data.List.make(_elm);
+   var Generator = Elm.Generator.make(_elm);
+   var Generator = Generator || {};
+   Generator.Standard = Elm.Generator.Standard.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Input = Elm.Input.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Shuffle = Elm.Shuffle.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var faceButton = Input.buttons(Maybe.Nothing);
+   var input = A3(Signal.lift2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   faceButton.events,
+   Time.timestamp(Core.startSignal));
+   var grid = F2(function (n,
+   elems) {
+      return function () {
+         var ess = A2(Data.List.chunk,
+         n,
+         elems);
+         var acrosses = A2(List.map,
+         function (es) {
+            return A2(Graphics.Element.flow,
+            Graphics.Element.right,
+            es);
+         },
+         ess);
+         var downs = A2(Graphics.Element.flow,
+         Graphics.Element.down,
+         acrosses);
+         return downs;
+      }();
+   });
+   var imgUrl = F2(function (i,
+   happy) {
+      return function () {
+         var name = happy ? "happy" : "sad";
+         return _L.append("img/",
+         _L.append(Prelude.show(i),
+         _L.append("_",
+         _L.append(name,".png"))));
+      }();
+   });
+   var size = 150;
+   var img = A2(Graphics.Element.fittedImage,
+   size,
+   size);
+   var face = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var e = img(A2(imgUrl,
+                 _v0._0,
+                 _v0._1));
+                 return A2(faceButton.button,
+                 Maybe.Just(_v0._0),
+                 e);
+              }();}
+         _E.Case($moduleName,
+         "between lines 96 and 99");
+      }();
+   };
+   var faces = function (moods) {
+      return A2(List.map,
+      face,
+      moods);
+   };
+   var change = F2(function (n,
+   moods) {
+      return function () {
+         var switcher = function (_v4) {
+            return function () {
+               switch (_v4.ctor)
+               {case "_Tuple2":
+                  return _U.eq(_v4._0,
+                    n) ? {ctor: "_Tuple2"
+                         ,_0: _v4._0
+                         ,_1: Basics.not(_v4._1)} : {ctor: "_Tuple2"
+                                                    ,_0: _v4._0
+                                                    ,_1: _v4._1};}
+               _E.Case($moduleName,
+               "on line 36, column 23 to 62");
+            }();
+         };
+         return A2(List.map,
+         switcher,
+         moods);
+      }();
+   });
+   var allSad = A2(List.map,
+   function (i) {
+      return {ctor: "_Tuple2"
+             ,_0: i
+             ,_1: false};
+   },
+   _L.range(0,15));
+   var select = F2(function (n,
+   model) {
+      return function () {
+         var _v8 = A2(Core.lookup,
+         n,
+         model.state);
+         switch (_v8.ctor)
+         {case "Just": switch (_v8._0)
+              {case false: return model;
+                 case true: return function () {
+                      var $ = A2(Shuffle.shuffle,
+                      allSad,
+                      model.generator),
+                      state$ = $._0,
+                      generator$ = $._1;
+                      var $ = A2(Generator.int32Range,
+                      {ctor: "_Tuple2",_0: 0,_1: 15},
+                      generator$),
+                      val = $._0,
+                      generator$$ = $._1;
+                      var state$$ = A2(change,
+                      val,
+                      state$);
+                      return _U.replace([["state"
+                                         ,state$$]
+                                        ,["generator",generator$$]],
+                      model);
+                   }();}
+              break;
+            case "Nothing": return model;}
+         _E.Case($moduleName,
+         "between lines 43 and 52");
+      }();
+   });
+   var step = F2(function (_v10,
+   model) {
+      return function () {
+         switch (_v10.ctor)
+         {case "_Tuple2":
+            switch (_v10._1.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var m = model;
+                      var model$ = function () {
+                         var _v16 = m.init;
+                         switch (_v16)
+                         {case false:
+                            return function () {
+                                 var n = 0;
+                                 var m$ = _U.replace([["init"
+                                                      ,true]
+                                                     ,["state"
+                                                      ,A2(change,n,allSad)]
+                                                     ,["generator"
+                                                      ,Generator.Standard.generator(Basics.round(_v10._1._0))]],
+                                 m);
+                                 return A2(select,n,m$);
+                              }();
+                            case true: return function () {
+                                 switch (_v10._0.ctor)
+                                 {case "Just": return A2(select,
+                                      _v10._0._0,
+                                      m);
+                                    case "Nothing":
+                                    return Core.error("No selection supplied");}
+                                 _E.Case($moduleName,
+                                 "between lines 61 and 64");
+                              }();}
+                         _E.Case($moduleName,
+                         "between lines 60 and 72");
+                      }();
+                      return model$;
+                   }();}
+              break;}
+         _E.Case($moduleName,
+         "between lines 57 and 73");
+      }();
+   });
+   var allMoods = A2(List.concatMap,
+   function (i) {
+      return _J.toList([{ctor: "_Tuple2"
+                        ,_0: i
+                        ,_1: false}
+                       ,{ctor: "_Tuple2"
+                        ,_0: i
+                        ,_1: true}]);
+   },
+   _L.range(0,15));
+   var initialState = {_: {}
+                      ,generator: Generator.Standard.generator(0)
+                      ,init: false
+                      ,state: _J.toList([])};
+   var Model = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,generator: c
+             ,init: a
+             ,state: b};
+   });
+   var debug = false;
+   var display = function (model) {
+      return function () {
+         var allImageCache = A2(List.map,
+         function (_v19) {
+            return function () {
+               switch (_v19.ctor)
+               {case "_Tuple2":
+                  return A3(Graphics.Element.fittedImage,
+                    0,
+                    0,
+                    A2(imgUrl,_v19._0,_v19._1));}
+               _E.Case($moduleName,
+               "on line 121, column 36 to 63");
+            }();
+         },
+         allMoods);
+         var g = A2(grid,
+         4,
+         faces(model.state));
+         var elements = _L.append(allImageCache,
+         _J.toList([g]));
+         return Basics.not(debug) ? A2(Graphics.Element.flow,
+         Graphics.Element.down,
+         elements) : A2(Graphics.Element.flow,
+         Graphics.Element.down,
+         _L.append(elements,
+         _J.toList([Text.asText(model)])));
+      }();
+   };
+   var main = A2(Signal.lift,
+   display,
+   A3(Signal.foldp,
+   step,
+   initialState,
+   input));
+   _elm.Main.values = {_op: _op
+                      ,debug: debug
+                      ,initialState: initialState
+                      ,allMoods: allMoods
+                      ,allSad: allSad
+                      ,change: change
+                      ,select: select
+                      ,step: step
+                      ,size: size
+                      ,img: img
+                      ,imgUrl: imgUrl
+                      ,face: face
+                      ,faces: faces
+                      ,grid: grid
+                      ,display: display
+                      ,faceButton: faceButton
+                      ,input: input
+                      ,main: main
+                      ,Model: Model};
+   return _elm.Main.values;
+};Elm.Input = Elm.Input || {};
+Elm.Input.make = function (_elm) {
+   _elm.Input = _elm.Input || {};
+   if (_elm.Input.values)
+   return _elm.Input.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Input";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Core = Elm.Core.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Input = Elm.Graphics.Input.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Mouse = Elm.Mouse.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var fromJust = function (x) {
+      return function () {
+         switch (x.ctor)
+         {case "Just": return x._0;
+            case "Nothing":
+            return Core.error("Nothing received in fromJust");}
+         _E.Case($moduleName,
+         "between lines 12 and 14");
+      }();
+   };
+   var justs = F2(function (x,s) {
+      return A2(Signal._op["<~"],
+      fromJust,
+      A3(Signal.keepIf,
+      Maybe.isJust,
+      Maybe.Just(x),
+      s));
+   });
+   var buttons = function (def) {
+      return function () {
+         var hovs = Graphics.Input.hoverables(Maybe.Just(def));
+         return {_: {}
+                ,button: function (v) {
+                   return hovs.hoverable(function (b) {
+                      return b ? Maybe.Just(v) : Maybe.Nothing;
+                   });
+                }
+                ,events: justs(def)(A2(Signal.keepWhen,
+                Mouse.isDown,
+                Maybe.Just(def))(hovs.events))};
+      }();
+   };
+   var $const = F2(function (x,y) {
+      return x;
+   });
+   _elm.Input.values = {_op: _op
+                       ,buttons: buttons};
+   return _elm.Input.values;
+};Elm.Core = Elm.Core || {};
+Elm.Core.make = function (_elm) {
+   _elm.Core = _elm.Core || {};
+   if (_elm.Core.values)
+   return _elm.Core.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Core";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Error = Elm.Native.Error.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var atStart = A2(Signal._op["<~"],
+   function (c) {
+      return _U.eq(c,1);
+   },
+   Signal.count(Time.fps(25)));
+   var onStart = A3(Signal.keepIf,
+   Basics.id,
+   false,
+   atStart);
+   var sampleStart = function (s) {
+      return A2(Signal.sampleOn,
+      onStart,
+      s);
+   };
+   var startSignal = A3(Signal.foldp,
+   F2(function (v,acc) {
+      return Basics.abs(acc);
+   }),
+   -1,
+   sampleStart(Signal.constant(0)));
+   var lookup = F2(function (key,
+   kvs) {
+      return _U.eq(kvs,
+      _J.toList([])) ? Maybe.Nothing : function () {
+         var $ = List.head(kvs),
+         k = $._0,
+         v = $._1;
+         return _U.eq(key,
+         k) ? Maybe.Just(v) : A2(lookup,
+         key,
+         List.tail(kvs));
+      }();
+   });
+   var divMod = F2(function (n,d) {
+      return {ctor: "_Tuple2"
+             ,_0: A2(Basics.div,n,d)
+             ,_1: A2(Basics.mod,n,d)};
+   });
+   var error = function (msg) {
+      return Native.Error.raise(msg);
+   };
+   _elm.Core.values = {_op: _op
+                      ,error: error
+                      ,divMod: divMod
+                      ,lookup: lookup
+                      ,atStart: atStart
+                      ,onStart: onStart
+                      ,sampleStart: sampleStart
+                      ,startSignal: startSignal};
+   return _elm.Core.values;
+};Elm.Shuffle = Elm.Shuffle || {};
+Elm.Shuffle.make = function (_elm) {
+   _elm.Shuffle = _elm.Shuffle || {};
+   if (_elm.Shuffle.values)
+   return _elm.Shuffle.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Shuffle";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Data = Data || {};
+   Data.List = Elm.Data.List.make(_elm);
+   var Generator = Elm.Generator.make(_elm);
+   var Generator = Generator || {};
+   Generator.Standard = Elm.Generator.Standard.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var shuffleInner = F3(function (bs,
+   acc,
+   gen) {
+      return function () {
+         switch (bs.ctor)
+         {case "[]":
+            return {ctor: "_Tuple2"
+                   ,_0: acc
+                   ,_1: gen};}
+         return function () {
+            var $ = A2(Generator.int32Range,
+            {ctor: "_Tuple2"
+            ,_0: 0
+            ,_1: List.length(bs) - 1},
+            gen),
+            k = $._0,
+            gen$ = $._1;
+            var $ = A2(Data.List.splitAt,
+            k,
+            bs);
+            var lead = function () {
+               switch ($.ctor)
+               {case "_Tuple2":
+                  switch ($._1.ctor)
+                    {case "::": return $._0;}
+                    break;}
+               _E.Case($moduleName,
+               "on line 16, column 38 to 50");
+            }();
+            var x = function () {
+               switch ($.ctor)
+               {case "_Tuple2":
+                  switch ($._1.ctor)
+                    {case "::": return $._1._0;}
+                    break;}
+               _E.Case($moduleName,
+               "on line 16, column 38 to 50");
+            }();
+            var xs = function () {
+               switch ($.ctor)
+               {case "_Tuple2":
+                  switch ($._1.ctor)
+                    {case "::": return $._1._1;}
+                    break;}
+               _E.Case($moduleName,
+               "on line 16, column 38 to 50");
+            }();
+            var bs$ = _L.append(lead,xs);
+            var acc$ = {ctor: "::"
+                       ,_0: x
+                       ,_1: acc};
+            return A3(shuffleInner,
+            bs$,
+            acc$,
+            gen$);
+         }();
+      }();
+   });
+   var shuffle = F2(function (xs,
+   gen) {
+      return A3(shuffleInner,
+      xs,
+      _J.toList([]),
+      gen);
+   });
+   _elm.Shuffle.values = {_op: _op
+                         ,shuffle: shuffle};
+   return _elm.Shuffle.values;
+};Elm.Data = Elm.Data || {};
+Elm.Data.List = Elm.Data.List || {};
+Elm.Data.List.make = function (_elm) {
+   _elm.Data = _elm.Data || {};
+   _elm.Data.List = _elm.Data.List || {};
+   if (_elm.Data.List.values)
+   return _elm.Data.List.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Data.List";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var splitAt = F2(function (n,
+   xs) {
+      return {ctor: "_Tuple2"
+             ,_0: A2(List.take,n,xs)
+             ,_1: A2(List.drop,n,xs)};
+   });
+   var chunk = F2(function (n,xs) {
+      return function () {
+         var go = function (bs) {
+            return function () {
+               var $ = A2(splitAt,n,bs),
+               a = $._0,
+               b = $._1;
+               return _U.eq(a,
+               _J.toList([])) ? _J.toList([]) : {ctor: "::"
+                                                ,_0: a
+                                                ,_1: go(b)};
+            }();
+         };
+         return go(xs);
+      }();
+   });
+   _elm.Data.List.values = {_op: _op
+                           ,chunk: chunk
+                           ,splitAt: splitAt};
+   return _elm.Data.List.values;
+};Elm.Generator = Elm.Generator || {};
+Elm.Generator.Standard = Elm.Generator.Standard || {};
+Elm.Generator.Standard.make = function (_elm) {
+   _elm.Generator = _elm.Generator || {};
+   _elm.Generator.Standard = _elm.Generator.Standard || {};
+   if (_elm.Generator.Standard.values)
+   return _elm.Generator.Standard.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Generator.Standard";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Generator = Elm.Generator.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var magicNum8 = 2147483562;
+   var stdRange = function (_v0) {
+      return function () {
+         return {ctor: "_Tuple2"
+                ,_0: 0
+                ,_1: magicNum8};
+      }();
+   };
+   var magicNum7 = 2137383399;
+   var magicNum6 = 2147483563;
+   var magicNum5 = 3791;
+   var magicNum4 = 40692;
+   var magicNum3 = 52774;
+   var magicNum2 = 12211;
+   var magicNum1 = 53668;
+   var magicNum0 = 40014;
+   var Standard = F2(function (a,
+   b) {
+      return {ctor: "Standard"
+             ,_0: a
+             ,_1: b};
+   });
+   var mkStdGen = function (s$) {
+      return function () {
+         var s = A2(Basics.max,
+         s$,
+         0 - s$);
+         var q = s / (magicNum6 - 1) | 0;
+         var s2 = A2(Basics.mod,
+         q,
+         magicNum7 - 1);
+         var s1 = A2(Basics.mod,
+         s,
+         magicNum6 - 1);
+         return A2(Standard,
+         s1 + 1,
+         s2 + 1);
+      }();
+   };
+   var stdNext = function (_v2) {
+      return function () {
+         switch (_v2.ctor)
+         {case "Standard":
+            return function () {
+                 var k$ = _v2._1 / magicNum3 | 0;
+                 var s2$ = magicNum4 * (_v2._1 - k$ * magicNum3) - k$ * magicNum5;
+                 var s2$$ = _U.cmp(s2$,
+                 0) < 0 ? s2$ + magicNum7 : s2$;
+                 var k = _v2._0 / magicNum1 | 0;
+                 var s1$ = magicNum0 * (_v2._0 - k * magicNum1) - k * magicNum2;
+                 var s1$$ = _U.cmp(s1$,
+                 0) < 0 ? s1$ + magicNum6 : s1$;
+                 var z = s1$$ - s2$$;
+                 var z$ = _U.cmp(z,
+                 1) < 0 ? z + magicNum8 : z;
+                 return {ctor: "_Tuple2"
+                        ,_0: z$
+                        ,_1: A2(Standard,s1$$,s2$$)};
+              }();}
+         _E.Case($moduleName,
+         "between lines 59 and 67");
+      }();
+   };
+   var stdSplit = function (_v6) {
+      return function () {
+         switch (_v6.ctor)
+         {case "Standard":
+            return function () {
+                 var $raw = Basics.snd(stdNext(_v6)),
+                 $ = $raw.ctor === "Standard" ? $raw : _E.Case($moduleName,
+                 "on line 73, column 28 to 44"),
+                 t1 = $._0,
+                 t2 = $._1;
+                 var new_s2 = _U.eq(_v6._1,
+                 1) ? magicNum7 - 1 : _v6._1 - 1;
+                 var new_s1 = _U.eq(_v6._0,
+                 magicNum6 - 1) ? 1 : _v6._0 + 1;
+                 return {ctor: "_Tuple2"
+                        ,_0: A2(Standard,new_s1,t2)
+                        ,_1: A2(Standard,t1,new_s2)};
+              }();}
+         _E.Case($moduleName,
+         "between lines 71 and 74");
+      }();
+   };
+   var generator = function (seed) {
+      return A4(Generator.Generator,
+      mkStdGen(seed),
+      stdNext,
+      stdSplit,
+      stdRange);
+   };
+   _elm.Generator.Standard.values = {_op: _op
+                                    ,generator: generator};
+   return _elm.Generator.Standard.values;
+};Elm.Generator = Elm.Generator || {};
+Elm.Generator.make = function (_elm) {
+   _elm.Generator = _elm.Generator || {};
+   if (_elm.Generator.values)
+   return _elm.Generator.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Generator";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var _op = {};
+   var Generator = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,next: b
+             ,range: d
+             ,split: c
+             ,state: a};
+   });
+   var listOfHelp = F4(function (list,
+   generate,
+   n,
+   generator) {
+      return _U.cmp(n,
+      1) < 0 ? {ctor: "_Tuple2"
+               ,_0: List.reverse(list)
+               ,_1: generator} : function () {
+         var $ = generate(generator),
+         value = $._0,
+         generator$ = $._1;
+         return A4(listOfHelp,
+         {ctor: "::",_0: value,_1: list},
+         generate,
+         n - 1,
+         generator$);
+      }();
+   });
+   var listOf = listOfHelp(_J.toList([]));
+   var minInt32 = -2147483648;
+   var maxInt32 = 2147483647;
+   var iLogBase = F2(function (b,
+   i) {
+      return _U.cmp(i,
+      b) < 0 ? 1 : 1 + A2(iLogBase,
+      b,
+      i / b | 0);
+   });
+   var int32Range = F2(function (_v0,
+   generator) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return _U.cmp(_v0._0,
+              _v0._1) > 0 ? A2(int32Range,
+              {ctor: "_Tuple2"
+              ,_0: _v0._1
+              ,_1: _v0._0},
+              generator) : function () {
+                 var b = 2147483561;
+                 var f = F3(function (n,
+                 acc,
+                 state) {
+                    return function () {
+                       switch (n)
+                       {case 0: return {ctor: "_Tuple2"
+                                       ,_0: acc
+                                       ,_1: state};}
+                       return function () {
+                          var $ = generator.next(state),
+                          x = $._0,
+                          state$ = $._1;
+                          return A3(f,
+                          n - 1,
+                          x + acc * b,
+                          state$);
+                       }();
+                    }();
+                 });
+                 var k = _v0._1 - _v0._0 + 1;
+                 var n = A2(iLogBase,b,k);
+                 var $ = A3(f,
+                 n,
+                 1,
+                 generator.state),
+                 v = $._0,
+                 state$ = $._1;
+                 return {ctor: "_Tuple2"
+                        ,_0: _v0._0 + A2(Basics.mod,v,k)
+                        ,_1: _U.replace([["state"
+                                         ,state$]],
+                        generator)};
+              }();}
+         _E.Case($moduleName,
+         "between lines 74 and 87");
+      }();
+   });
+   var floatRange = F2(function (_v5,
+   generator) {
+      return function () {
+         switch (_v5.ctor)
+         {case "_Tuple2":
+            return _U.cmp(_v5._0,
+              _v5._1) > 0 ? A2(floatRange,
+              {ctor: "_Tuple2"
+              ,_0: _v5._1
+              ,_1: _v5._0},
+              generator) : function () {
+                 var $ = A2(int32Range,
+                 {ctor: "_Tuple2"
+                 ,_0: minInt32
+                 ,_1: maxInt32},
+                 generator),
+                 x = $._0,
+                 generator$ = $._1;
+                 var scaled = (_v5._0 + _v5._1) / 2 + (_v5._1 - _v5._0) / Basics.toFloat(maxInt32 - minInt32) * Basics.toFloat(x);
+                 return {ctor: "_Tuple2"
+                        ,_0: scaled
+                        ,_1: generator$};
+              }();}
+         _E.Case($moduleName,
+         "between lines 118 and 123");
+      }();
+   });
+   var $float = floatRange({ctor: "_Tuple2"
+                           ,_0: 0
+                           ,_1: 1});
+   var int32 = int32Range({ctor: "_Tuple2"
+                          ,_0: minInt32
+                          ,_1: maxInt32});
+   _elm.Generator.values = {_op: _op
+                           ,Generator: Generator
+                           ,int32: int32
+                           ,int32Range: int32Range
+                           ,$float: $float
+                           ,floatRange: floatRange
+                           ,listOf: listOf
+                           ,minInt32: minInt32
+                           ,maxInt32: maxInt32};
+   return _elm.Generator.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>

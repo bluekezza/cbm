@@ -43,14 +43,14 @@ case $command in
       vagrant destroy -f
       exit 0;;
     build)
-      rm -rf ./build
-      mkdir ./build
-      cp -vr ./img ./build/img
-      cp ./.cabal-sandbox/share/i386-linux-ghc-7.4.1/Elm-0.11/elm-runtime.js ./build/elm-runtime.js 2> /dev/null || cp ~/.cabal/share/Elm-0.11/elm-runtime.js ./build/elm-runtime.js 2> /dev/null 
-      elm --make -r "elm-runtime.js" index.elm
+      rm -rf ./dist
+      mkdir ./dist
+      cp -vr ./img ./dist/img
+      cp ./.cabal-sandbox/share/i386-linux-ghc-7.4.1/Elm-0.11/elm-runtime.js ./dist/elm-runtime.js 2> /dev/null || cp ~/.cabal/share/Elm-0.11/elm-runtime.js ./dist/elm-runtime.js 2> /dev/null 
+      elm --make -r "elm-runtime.js" -b ./dist index.elm
       exit 0;;
     start)
-      cd ./build
+      cd ./dist
       echo "starting in $(pwd)"
       elm-server --port=3000
       cd ../
